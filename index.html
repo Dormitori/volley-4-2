@@ -57,8 +57,7 @@ body{
   z-index:9;filter:drop-shadow(0 .5cqw .7cqw rgba(0,0,0,.5))}
 #ball svg{width:100%;height:100%;display:block}
 
-#arrows{position:absolute;inset:0;pointer-events:none;z-index:4;overflow:visible}
-#arrows path{fill:none;stroke-linecap:round}
+#board path.mv{fill:none;stroke-linecap:round}
 
 /* ---------- Наложенный интерфейс ---------- */
 .ui{position:absolute;z-index:20}
@@ -605,6 +604,48 @@ function bandsSVG(){
   });
   return out;
 }
+const PR = 24;                 /* кружок игрока (радиус 21) плюс зазор */
+const ARR = 30;                /* столько длины стрелке нужно, чтобы её было видно */
+
+/* В какую сторону отвести стрелку: туда, где меньше чужих кружков и где не вылезем с площадки. */
+function arrowSide(mx,my,px,py,off,pos,self){
+  function busy(sx,sy){
+    let n = (sy<8 || sy>292 || sx>302) ? 3 : 0;
+    IDS.forEach(function(id){
+      if(id===self) return;
+      const p=pos[id];
+      if(Math.hypot(p[0]-sx,p[1]-sy) < PR+12) n++;
+    });
+    return n;
+  }
+  return busy(mx-px*off, my-py*off) < busy(mx+px*off, my+py*off) ? -1 : 1;
+}
+
+/* Стрелка перемещения. Между кружками игрока остаётся просвет len-2*PR — у короткого
+   перебега его не хватает даже на остриё, и стрелка целиком пряталась бы под кружками.
+   Поэтому чем короче перебег, тем сильнее стрелка отходит вбок: сдвиг подобран так,
+   чтобы её концы всегда лежали ровно на границе кружков, а длина не падала ниже ARR. */
+function moveArrow(a,b,pos,self){
+  const dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
+  if(len<10) return '';                       /* подшаг — стрелка только зашумит */
+  const ux=dx/len, uy=dy/len, gap=(len-ARR)/2;
+  const off=Math.sqrt(Math.max(0, PR*PR - gap*gap));      /* отвод вбок */
+  const cut=Math.sqrt(Math.max(0, PR*PR - off*off));      /* сколько срезать с концов */
+  const half=Math.max(ARR/2, len/2 - cut);
+  let px=-uy, py=ux;
+  if(off>6){ const sd=arrowSide((a[0]+b[0])/2,(a[1]+b[1])/2,px,py,off,pos,self); px*=sd; py*=sd; }
+  const cx=(a[0]+b[0])/2+px*off, cy=(a[1]+b[1])/2+py*off;
+  const bow=Math.max(0, len*0.065-off);       /* лёгкий изгиб остаётся только у длинных */
+  const A=T(cx-ux*half, cy-uy*half), B=T(cx+ux*half, cy+uy*half),
+        C=T(cx+px*bow*2, cy+py*bow*2);
+  const L=Math.hypot(B[0]-A[0], B[1]-A[1]);
+  const sw=Math.max(2.1, Math.min(3.2, L*0.055));         /* остриё растёт от толщины линии */
+  const dash=(sw*2.8).toFixed(2)+' '+(sw*2.2).toFixed(2);
+  return '<path class="mv" fill="none" d="M'+A[0].toFixed(1)+' '+A[1].toFixed(1)+' Q'+
+    C[0].toFixed(1)+' '+C[1].toFixed(1)+' '+B[0].toFixed(1)+' '+B[1].toFixed(1)+
+    '" stroke="#ffd54a" stroke-width="'+sw.toFixed(2)+'" stroke-dasharray="'+dash+
+    '" opacity=".85" marker-end="url(#ah)"/>';
+}
 function drawArrows(prev,s){
   const check = state.overlap && state.step<=1, v=VB();
   arrows.setAttribute('viewBox','0 0 '+v.w+' '+v.h);
@@ -613,24 +654,14 @@ function drawArrows(prev,s){
   out+=courtSVG();
   if(s.bands) out+=bandsSVG();
   if(prev && !check){
-    IDS.forEach(function(id){
-      const a=prev.pos[id], b=s.pos[id];
-      const dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
-      if(len<16) return;
-      const RR=21, ux=dx/len, uy=dy/len;
-      const A=T(a[0]+ux*RR, a[1]+uy*RR), B=T(b[0]-ux*RR, b[1]-uy*RR);
-      const x1=A[0],y1=A[1],x2=B[0],y2=B[1];
-      if(Math.hypot(x2-x1,y2-y1)<6) return;
-      const dX=x2-x1, dY=y2-y1;
-      const mx=(x1+x2)/2-dY*0.13, my=(y1+y2)/2+dX*0.13;
-      out+='<path class="mv" d="M'+x1+' '+y1+' Q'+mx+' '+my+' '+x2+' '+y2+
-           '" stroke="#ffd54a" stroke-width="3.2" stroke-dasharray="9 7" opacity=".85" marker-end="url(#ah)"/>';
-    });
+    IDS.forEach(function(id){ out+=moveArrow(prev.pos[id], s.pos[id], s.pos, id); });
   }
   if(check) out+=overlapSVG(s.pos,state.rot,state.mode);
   arrows.innerHTML=out;
   arrows.querySelectorAll('path.mv').forEach(function(pt){
-    pt.animate([{strokeDashoffset:32},{strokeDashoffset:0}],{duration:900,iterations:Infinity});
+    const d=pt.getAttribute('stroke-dasharray').split(' ');
+    const period=parseFloat(d[0])+parseFloat(d[1]);
+    pt.animate([{strokeDashoffset:period*2},{strokeDashoffset:0}],{duration:900,iterations:Infinity});
   });
 }
 
