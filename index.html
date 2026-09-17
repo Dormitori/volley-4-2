@@ -6,18 +6,20 @@
 <title>Расстановка 4-2 в волейболе</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+:root{--vh:100vh}
+@supports (height:100dvh){:root{--vh:100dvh}}
+html,body{height:var(--vh)}
 body{
   background:#4b4b4b;
   background-image:
     repeating-linear-gradient(135deg, rgba(255,255,255,.028) 0 2px, rgba(255,255,255,0) 2px 26px),
     radial-gradient(120% 90% at 50% 40%, #585858 0%, #3e3e3e 70%, #303030 100%);
   font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
-  color:#fff;overflow:hidden;
+  color:#fff;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;
 }
 #stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 #field{
-  position:relative;aspect-ratio:720/448;width:min(100vw, 158vh);max-height:100vh;
+  position:relative;aspect-ratio:720/448;width:min(100vw, calc(var(--vh)*1.56));max-height:var(--vh);
   container-type:size;container-name:field;
 }
 
@@ -27,13 +29,12 @@ body{
 /* ---------- Игроки ---------- */
 #layer{position:absolute;inset:0;pointer-events:none}
 .player{
-  position:absolute;width:5.4cqw;height:5.4cqw;border-radius:50%;
-  transform:translate(-50%,-50%);
+  position:absolute;left:0;top:0;width:5.4cqw;height:5.4cqw;border-radius:50%;
+  will-change:transform;
   display:flex;align-items:center;justify-content:center;
   font-weight:800;font-size:2.05cqw;letter-spacing:.02cqw;color:#fff;
   box-shadow:0 .55cqw 1.1cqw rgba(0,0,0,.45), inset 0 -.35cqw .7cqw rgba(0,0,0,.18);
-  transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1),
-             box-shadow .3s, opacity .3s;
+  transition:transform .85s cubic-bezier(.45,.05,.2,1), box-shadow .3s, opacity .3s;
   pointer-events:auto;cursor:default;z-index:5;
 }
 .player.moving{z-index:8}
@@ -52,10 +53,11 @@ body{
 .player:hover .tip{opacity:1}
 .player.hl{box-shadow:0 0 0 .7cqw rgba(255,213,74,.55), 0 .55cqw 1.1cqw rgba(0,0,0,.45)}
 
-#ball{position:absolute;width:4.1cqw;height:4.1cqw;transform:translate(-50%,-50%);
-  transition:left .9s cubic-bezier(.3,.7,.4,1), top .9s cubic-bezier(.3,.7,.4,1), opacity .3s;
-  z-index:9;filter:drop-shadow(0 .5cqw .7cqw rgba(0,0,0,.5))}
-#ball svg{width:100%;height:100%;display:block}
+#ball{position:absolute;left:0;top:0;width:4.1cqw;height:4.1cqw;will-change:transform;
+  transition:transform .9s cubic-bezier(.3,.7,.4,1), opacity .3s;
+  z-index:9}
+/* тень на внутреннем svg, а не на движущемся слое: так iOS не перерисовывает её каждый кадр */
+#ball svg{width:100%;height:100%;display:block;filter:drop-shadow(0 .5cqw .7cqw rgba(0,0,0,.5))}
 
 #board path.mv{fill:none;stroke-linecap:round}
 
@@ -72,6 +74,7 @@ body{
 }
 .btn:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.55)}
 .btn:active{transform:translateY(.15cqw)}
+.btn,.seg button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .btn[disabled]{opacity:.32;cursor:default;pointer-events:none}
 .btn.on{background:#3aa7d8;border-color:rgba(255,255,255,.6);color:#04222f}
 .btn.on:hover{background:#4fb9e8}
@@ -136,7 +139,7 @@ body{
   background:rgba(12,12,12,.74);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 #modal.open{display:flex;animation:fade .22s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-#modalBox{position:relative;width:min(88cqw,95vw);max-height:94vh;overflow:auto;background:#262626;border-radius:1.4cqw;
+#modalBox{position:relative;width:min(88cqw,95vw);max-height:calc(var(--vh)*.94);overflow:auto;background:#262626;border-radius:1.4cqw;
   border:.13cqw solid rgba(255,255,255,.18);padding:2cqw 2.4cqw;
   box-shadow:0 2cqw 6cqw rgba(0,0,0,.6);animation:pop .26s cubic-bezier(.2,.9,.3,1.2)}
 @keyframes pop{from{transform:scale(.94) translateY(1.5cqw);opacity:0}to{transform:none;opacity:1}}
@@ -162,7 +165,7 @@ body{
 
 /* ================= ПОРТРЕТ (телефон) ================= */
 @media (max-aspect-ratio: 1/1){
-  #field{aspect-ratio:344/840;width:min(100vw, 41vh)}
+  #field{aspect-ratio:344/840;width:min(100vw, calc(var(--vh)*.378))}
 
   .player{width:11.2cqw;height:11.2cqw;font-size:4.3cqw}
   .player .zbadge{width:5.3cqw;height:5.3cqw;font-size:2.85cqw;top:-2.2cqw;right:-2.2cqw}
@@ -182,7 +185,9 @@ body{
   .seg{border-radius:1.7cqw}
   .seg button{font-size:2.55cqw;padding:2cqw 4.4cqw;letter-spacing:0}
 
+  /* на телефоне панель непрозрачная: под backdrop-filter iOS смазывает всё, что под ним движется */
   #steps{left:4.5%;right:4.5%;top:7.6%;width:auto;transform:none;
+         background:rgba(20,20,20,.94);backdrop-filter:none;-webkit-backdrop-filter:none;
          padding:2.2cqw 2.6cqw 2.4cqw;border-radius:2.2cqw}
   #steps h4{display:none}
   #legend{display:none}
@@ -199,7 +204,7 @@ body{
   .grp{gap:1.2cqw}
   #toZones,#toggleStand{display:none}
 
-  #modalBox{width:94vw;max-height:88vh;padding:4cqw 4.4cqw;border-radius:3cqw}
+  #modalBox{width:94vw;max-height:calc(var(--vh)*.88);padding:4cqw 4.4cqw;border-radius:3cqw}
   #modalBox h2{font-size:5.4cqw}
   #modalBox .sub{font-size:2.9cqw;margin-bottom:3cqw}
   #modalBox h3{font-size:3.6cqw;margin:3cqw 0 1.4cqw}
@@ -223,7 +228,7 @@ body{
   <svg id="board" preserveAspectRatio="none"></svg>
 
   <div id="layer">
-    <div id="ball" style="left:50%;top:50%">
+    <div id="ball">
       <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="#f7c948" stroke="#2b2b2b" stroke-width="3"/>
       <path d="M32 3c-9 10-9 22-3 29 6 7 6 20 1 29M61 32c-12-3-22 2-27 9-5 7-16 10-26 8M9 10c3 12 12 19 21 20 9 1 17 9 20 18"
         fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"/></svg>
@@ -448,6 +453,8 @@ let portrait = false;
 const VIEW = {land:{w:720,h:448}, port:{w:344,h:840}};
 function VB(){ return portrait?VIEW.port:VIEW.land; }
 function T(x,y){ return portrait ? [y+22, 662-x] : [x+60, y+84]; }
+/* сдвиг вместо left/top: так браузер не перерисовывает слой и на iOS не остаётся шлейф */
+function TR(xy){ return 'translate3d(calc('+xy[0].toFixed(3)+'cqw - 50%),calc('+xy[1].toFixed(3)+'cqh - 50%),0)'; }
 function XY(p){ const t=T(p[0],p[1]), v=VB(); return [t[0]/v.w*100, t[1]/v.h*100]; }
 function R(x1,y1,x2,y2){ const a=T(x1,y1), b=T(x2,y2);
   return {x:Math.min(a[0],b[0]), y:Math.min(a[1],b[1]),
@@ -517,13 +524,13 @@ function render(){
   IDS.forEach(id=>{
     const p=s.pos[id], el=nodes[id], z=zoneOf(state.rot,id);
     const moved = prev && (Math.abs(prev.pos[id][0]-p[0])>14 || Math.abs(prev.pos[id][1]-p[1])>14);
-    const xy=XY(p); el.style.left=xy[0]+'%'; el.style.top=xy[1]+'%';
+    const xy=XY(p); el.style.transform=TR(xy);
     el.classList.toggle('moving',!!moved);
     el.classList.toggle('hl', s.hl.indexOf(id)>=0);
     el.classList.toggle('srv', id===server && state.step<=2);
     el.querySelector('.zbadge').textContent=z;
   });
-  const bxy=XY(s.ball); ball.style.left=bxy[0]+'%'; ball.style.top=bxy[1]+'%';
+  ball.style.transform=TR(XY(s.ball));
   const canCheck = state.step<=1;
   const ob=document.getElementById('ovlBtn');
   ob.classList.toggle('on', state.overlap && canCheck);
