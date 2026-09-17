@@ -24,6 +24,7 @@ body{
 }
 
 /* ---------- Площадка (рисуется в SVG, чтобы разворачиваться в портрет) ---------- */
+#court{position:absolute;inset:0;container-type:size;container-name:court}
 #board{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
 
 /* ---------- Игроки ---------- */
@@ -164,60 +165,67 @@ body{
 
 
 /* ================= ПОРТРЕТ (телефон) ================= */
+/* ================= ПОРТРЕТ (телефон) =================
+   Здесь #field — весь экран: от его ширины считаются шрифты и кнопки, поэтому
+   они получают все 100% ширины телефона. Площадка живёт в своей коробке #court,
+   её пропорции не зависят от экрана. */
 @media (max-aspect-ratio: 1/1){
-  #field{aspect-ratio:344/840;width:min(100vw, calc(var(--vh)*.378))}
+  /* ширину ограничиваем, иначе на планшете интерфейс раздуется вдвое против площадки */
+  #field{aspect-ratio:auto;width:min(100vw, calc(var(--vh)*.46));height:var(--vh);max-height:none}
+  #court{inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);
+         width:min(100%, calc(var(--vh)*.378));height:auto;aspect-ratio:344/840}
 
   .player{width:11.2cqw;height:11.2cqw;font-size:4.3cqw}
   .player .zbadge{width:5.3cqw;height:5.3cqw;font-size:2.85cqw;top:-2.2cqw;right:-2.2cqw}
   .player .tip{display:none}
   #ball{width:8.6cqw;height:8.6cqw}
 
-  .btn{height:7.2cqw;padding:0 2.2cqw;font-size:2.55cqw;border-radius:1.7cqw;letter-spacing:0}
-  .btn.round{width:7.2cqw;height:7.2cqw;font-size:3.1cqw}
-  .btn.round.big{width:8.6cqw;height:8.6cqw;font-size:3.7cqw}
+  .btn{height:6.6cqw;padding:0 2cqw;font-size:2.35cqw;border-radius:1.55cqw;letter-spacing:0}
+  .btn.round{width:6.6cqw;height:6.6cqw;font-size:2.85cqw}
+  .btn.round.big{width:7.9cqw;height:7.9cqw;font-size:3.4cqw}
 
-  #topLeft{left:4%;top:.9%;gap:2.4cqw}
-  #rotTitle{font-size:6.8cqw;letter-spacing:.45cqw;min-width:0}
-  #rotTitle small{font-size:2.5cqw;letter-spacing:.12cqw;padding:.8cqw 1.5cqw;margin-top:1.1cqw}
+  #topLeft{left:0;right:0;top:2.2%;justify-content:center;gap:2.2cqw}
+  #rotTitle{font-size:6.25cqw;letter-spacing:.4cqw;min-width:0}
+  #rotTitle small{font-size:2.3cqw;letter-spacing:.11cqw;padding:.7cqw 1.4cqw;margin-top:1cqw}
   #topRight{display:none}
 
-  #modeSwitch{left:50%;top:86.2%;transform:translateX(-50%)}
-  .seg{border-radius:1.7cqw}
-  .seg button{font-size:2.55cqw;padding:2cqw 4.4cqw;letter-spacing:0}
+  #modeSwitch{left:50%;top:79.5%;transform:translateX(-50%)}
+  .seg{border-radius:1.55cqw}
+  .seg button{font-size:2.35cqw;padding:1.8cqw 4cqw;letter-spacing:0}
 
   /* на телефоне панель непрозрачная: под backdrop-filter iOS смазывает всё, что под ним движется */
-  #steps{left:4.5%;right:4.5%;top:7.6%;width:auto;transform:none;
+  #steps{left:4%;right:4%;top:10.6%;width:auto;transform:none;
          background:rgba(20,20,20,.94);backdrop-filter:none;-webkit-backdrop-filter:none;
-         padding:2.2cqw 2.6cqw 2.4cqw;border-radius:2.2cqw}
+         padding:2cqw 2.4cqw 2.2cqw;border-radius:2cqw}
   #steps h4{display:none}
   #legend{display:none}
-  #stepList{display:flex;gap:1cqw}
+  #stepList{display:flex;gap:.9cqw}
   .stepRow{flex:1 1 0;padding:.4cqw 0;justify-content:center;gap:0}
   .stepRow .lbl{display:none}
-  .stepRow .num{width:5.6cqw;height:5.6cqw;font-size:2.9cqw}
-  #stepNow{display:block;margin-top:1.6cqw;font-size:2.9cqw;font-weight:800;color:#f0c74a}
-  .ovlLeg{margin-top:1.4cqw;font-size:2.45cqw;line-height:1.4}
-  #stepDesc{margin-top:1cqw;padding-top:1cqw;font-size:2.75cqw;line-height:1.42;
-            max-height:38cqw;overflow-y:auto}
+  .stepRow .num{width:5.15cqw;height:5.15cqw;font-size:2.65cqw}
+  #stepNow{display:block;margin-top:1.5cqw;font-size:2.65cqw;font-weight:800;color:#f0c74a}
+  .ovlLeg{margin-top:1.3cqw;font-size:2.25cqw;line-height:1.4}
+  #stepDesc{margin-top:.9cqw;padding-top:.9cqw;font-size:2.55cqw;line-height:1.42;
+            max-height:34cqw;overflow-y:auto}
 
-  #botBar{left:3%;right:3%;bottom:1.2%;flex-wrap:wrap;justify-content:center;gap:1.4cqw}
-  .grp{gap:1.2cqw}
+  #botBar{left:3%;right:3%;bottom:5%;flex-wrap:wrap;justify-content:center;gap:1.3cqw}
+  .grp{gap:1.1cqw}
   #toZones,#toggleStand{display:none}
 
-  #modalBox{width:94vw;max-height:calc(var(--vh)*.88);padding:4cqw 4.4cqw;border-radius:3cqw}
-  #modalBox h2{font-size:5.4cqw}
-  #modalBox .sub{font-size:2.9cqw;margin-bottom:3cqw}
-  #modalBox h3{font-size:3.6cqw;margin:3cqw 0 1.4cqw}
-  #modalBox p,#modalBox li{font-size:3.1cqw;line-height:1.55}
-  #modalBox li{padding-left:4cqw;margin-bottom:1.2cqw}
-  #modalBox li:before{width:1.5cqw;height:1.5cqw;left:.6cqw;top:1.8cqw}
-  .note{font-size:3cqw;padding:2.2cqw 2.8cqw;border-left-width:.9cqw}
-  .mcols{flex-direction:column;gap:3cqw}
-  .mfig{flex:none;width:100%;display:flex;flex-wrap:wrap;gap:2cqw}
+  #modalBox{width:94vw;max-height:calc(var(--vh)*.88);padding:3.7cqw 4cqw;border-radius:2.75cqw}
+  #modalBox h2{font-size:4.95cqw}
+  #modalBox .sub{font-size:2.65cqw;margin-bottom:2.75cqw}
+  #modalBox h3{font-size:3.3cqw;margin:2.75cqw 0 1.3cqw}
+  #modalBox p,#modalBox li{font-size:2.85cqw;line-height:1.55}
+  #modalBox li{padding-left:3.7cqw;margin-bottom:1.1cqw}
+  #modalBox li:before{width:1.4cqw;height:1.4cqw;left:.55cqw;top:1.65cqw}
+  .note{font-size:2.75cqw;padding:2cqw 2.55cqw;border-left-width:.82cqw}
+  .mcols{flex-direction:column;gap:2.75cqw}
+  .mfig{flex:none;width:100%;display:flex;flex-wrap:wrap;gap:1.85cqw}
   .mfig{align-items:center}
   .mfig .msvg{width:58%}
-  .mcap{font-size:2.5cqw;width:36%;margin-top:0;text-align:left;line-height:1.4}
-  #modalClose{right:2.6cqw;top:2.6cqw}
+  .mcap{font-size:2.3cqw;width:36%;margin-top:0;text-align:left;line-height:1.4}
+  #modalClose{right:2.4cqw;top:2.4cqw}
 }
 </style>
 </head>
@@ -225,6 +233,7 @@ body{
 <div id="stage">
 <div id="field">
 
+  <div id="court">
   <svg id="board" preserveAspectRatio="none"></svg>
 
   <div id="layer">
@@ -233,6 +242,7 @@ body{
       <path d="M32 3c-9 10-9 22-3 29 6 7 6 20 1 29M61 32c-12-3-22 2-27 9-5 7-16 10-26 8M9 10c3 12 12 19 21 20 9 1 17 9 20 18"
         fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"/></svg>
     </div>
+  </div>
   </div>
 
   <!-- ВЕРХ СЛЕВА: ротация -->
