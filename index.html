@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Расстановка 4-2 в волейболе</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#4b4b4b;
+  background-image:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.028) 0 2px, rgba(255,255,255,0) 2px 26px),
+    radial-gradient(120% 90% at 50% 40%, #585858 0%, #3e3e3e 70%, #303030 100%);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  color:#fff;overflow:hidden;
+}
+#stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+#field{
+  position:relative;aspect-ratio:2/1;width:min(100vw, 195vh);max-height:100vh;
+  container-type:size;container-name:field;
+}
+
+/* ---------- Площадка ---------- */
+#court{position:absolute;left:8.333%;top:8.333%;width:83.333%;height:83.333%}
+.frame{position:absolute;inset:0;border:1.05cqw solid #fff;border-radius:.5cqw;
+  box-shadow:0 1.4cqw 3cqw rgba(0,0,0,.35)}
+.zoneBox{position:absolute;top:.9cqw;bottom:.9cqw;background:#8f8f8f;border-radius:.2cqw;
+  box-shadow:inset 0 0 4cqw rgba(0,0,0,.14)}
+.divider{position:absolute;top:0;bottom:0;width:.75cqw;background:#fff}
+#netline{position:absolute;left:calc(50% - .32cqw);top:-6.2cqw;bottom:-6.2cqw;width:.64cqw;
+  display:flex;flex-direction:column;justify-content:space-between;align-items:center;pointer-events:none}
+#netline i{display:block;width:1.3cqw;height:1.3cqw;border-radius:50%;background:#fff;
+  box-shadow:0 .2cqw .5cqw rgba(0,0,0,.3)}
+#sideTag{position:absolute;left:0;top:-3.4cqw;font-size:1.25cqw;letter-spacing:.32cqw;
+  color:rgba(255,255,255,.4);font-weight:700}
+#oppTag{position:absolute;right:0;top:-3.4cqw;font-size:1.25cqw;letter-spacing:.32cqw;
+  color:rgba(255,255,255,.4);font-weight:700}
+
+/* ---------- Игроки ---------- */
+#layer{position:absolute;inset:0;pointer-events:none}
+.player{
+  position:absolute;width:5.4cqw;height:5.4cqw;border-radius:50%;
+  transform:translate(-50%,-50%);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:2.05cqw;letter-spacing:.02cqw;color:#fff;
+  box-shadow:0 .55cqw 1.1cqw rgba(0,0,0,.45), inset 0 -.35cqw .7cqw rgba(0,0,0,.18);
+  transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1),
+             width .35s, height .35s, font-size .35s, box-shadow .3s, opacity .3s;
+  pointer-events:auto;cursor:default;z-index:5;
+}
+.player.moving{z-index:8}
+.player .zbadge{
+  position:absolute;top:-1.15cqw;right:-1.15cqw;width:2.5cqw;height:2.5cqw;border-radius:50%;
+  background:#fff;color:#2b2b2b;font-size:1.32cqw;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 .2cqw .5cqw rgba(0,0,0,.4);transition:background .3s,color .3s;
+}
+.player.srv .zbadge{background:#ffd54a;color:#4a3500}
+.player .tip{
+  position:absolute;bottom:-2.9cqw;left:50%;transform:translateX(-50%);
+  white-space:nowrap;font-size:1.15cqw;font-weight:600;color:rgba(255,255,255,.75);
+  background:rgba(0,0,0,.4);padding:.15cqw .6cqw;border-radius:.6cqw;opacity:0;transition:opacity .2s;
+}
+.player:hover .tip{opacity:1}
+.player.hl{box-shadow:0 0 0 .7cqw rgba(255,213,74,.55), 0 .55cqw 1.1cqw rgba(0,0,0,.45)}
+
+#ball{position:absolute;width:4.1cqw;height:4.1cqw;transform:translate(-50%,-50%);
+  transition:left .9s cubic-bezier(.3,.7,.4,1), top .9s cubic-bezier(.3,.7,.4,1), opacity .3s;
+  z-index:9;filter:drop-shadow(0 .5cqw .7cqw rgba(0,0,0,.5))}
+#ball svg{width:100%;height:100%;display:block}
+
+#arrows{position:absolute;inset:0;pointer-events:none;z-index:4;overflow:visible}
+#arrows path{fill:none;stroke-linecap:round}
+
+/* ---------- Наложенный интерфейс ---------- */
+.ui{position:absolute;z-index:20}
+.btn{
+  font-family:inherit;font-weight:700;color:#fff;cursor:pointer;
+  background:rgba(22,22,22,.62);border:.13cqw solid rgba(255,255,255,.26);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border-radius:.85cqw;padding:.78cqw 1.15cqw;font-size:1.2cqw;letter-spacing:.05cqw;
+  transition:background .18s,border-color .18s,transform .12s,opacity .18s;
+  white-space:nowrap;text-transform:uppercase;
+}
+.btn:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.55)}
+.btn:active{transform:translateY(.15cqw)}
+.btn[disabled]{opacity:.32;cursor:default;pointer-events:none}
+.btn.on{background:#3aa7d8;border-color:rgba(255,255,255,.6);color:#04222f}
+.btn.on:hover{background:#4fb9e8}
+.btn.accent{background:#e0b028;border-color:rgba(255,255,255,.5);color:#2a2000}
+.btn.accent:hover{background:#f2c33c}
+.btn.round{padding:0;width:3.5cqw;height:3.5cqw;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;font-size:1.5cqw}
+
+/* верх слева — ротация */
+#topLeft{left:2.2%;top:1.3%;display:flex;align-items:center;gap:1cqw}
+#rotTitle{font-size:3.1cqw;font-weight:800;letter-spacing:.3cqw;line-height:1;
+  text-shadow:0 .3cqw .9cqw rgba(0,0,0,.55);min-width:17cqw}
+#rotTitle small{display:block;font-size:1cqw;letter-spacing:.18cqw;font-weight:700;
+  color:rgba(255,255,255,.62);margin-top:.5cqw;background:rgba(18,18,18,.6);
+  padding:.28cqw .6cqw;border-radius:.5cqw}
+
+/* верх справа — режим */
+#topRight{right:2.2%;top:1.3%;display:flex;flex-direction:column;align-items:flex-end;gap:.9cqw}
+#modeTitle{font-size:2.9cqw;font-weight:800;letter-spacing:.4cqw;line-height:1;
+  text-shadow:0 .3cqw .9cqw rgba(0,0,0,.55);text-align:right}
+#modeSwitch{left:52%;top:1.5%;transform:translateX(-50%)}
+.seg{display:flex;background:rgba(22,22,22,.62);border:.13cqw solid rgba(255,255,255,.26);
+  border-radius:.9cqw;overflow:hidden;backdrop-filter:blur(6px)}
+.seg button{font-family:inherit;border:0;background:transparent;color:rgba(255,255,255,.65);
+  font-weight:700;font-size:1.18cqw;letter-spacing:.06cqw;padding:.75cqw 1.3cqw;cursor:pointer;
+  text-transform:uppercase;transition:background .18s,color .18s}
+.seg button.on{background:#e0b028;color:#2a2000}
+
+/* правая панель — шаги */
+#steps{right:2.6%;top:51%;transform:translateY(-50%);width:32cqw;
+  background:rgba(18,18,18,.68);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  border:.13cqw solid rgba(255,255,255,.18);border-radius:1.1cqw;padding:1.05cqw 1.2cqw 1.1cqw}
+#steps h4{font-size:1cqw;letter-spacing:.22cqw;color:rgba(255,255,255,.45);
+  text-transform:uppercase;margin-bottom:.6cqw;font-weight:700}
+.stepRow{display:flex;align-items:center;gap:.7cqw;padding:.26cqw .45cqw;border-radius:.55cqw;
+  cursor:pointer;transition:background .16s}
+.stepRow:hover{background:rgba(255,255,255,.08)}
+.stepRow .num{flex:0 0 auto;width:1.8cqw;height:1.8cqw;border-radius:50%;
+  background:rgba(255,255,255,.14);color:rgba(255,255,255,.6);
+  font-size:1cqw;font-weight:800;display:flex;align-items:center;justify-content:center}
+.stepRow .lbl{font-size:1.18cqw;font-weight:600;color:rgba(255,255,255,.62);line-height:1.3}
+.stepRow.on .num{background:#e0b028;color:#2a2000}
+.stepRow.on .lbl{color:#fff;font-weight:800}
+.stepRow.done .num{background:rgba(224,176,40,.35);color:#f4d98a}
+#stepDesc{margin-top:.75cqw;padding-top:.7cqw;border-top:.13cqw solid rgba(255,255,255,.16);
+  font-size:1.17cqw;line-height:1.45;color:rgba(255,255,255,.9)}
+#legend{margin-top:.7cqw;padding-top:.6cqw;border-top:.13cqw solid rgba(255,255,255,.12);
+  display:flex;flex-wrap:wrap;gap:.25cqw .9cqw}
+#legend div{display:flex;align-items:center;gap:.35cqw;font-size:.92cqw;font-weight:600;
+  color:rgba(255,255,255,.6);white-space:nowrap}
+#legend i{width:1.05cqw;height:1.05cqw;border-radius:50%;display:block;flex:0 0 auto}
+
+/* низ слева — подсказки */
+#botLeft{left:2.2%;bottom:1.8%;display:flex;gap:.8cqw;align-items:center}
+/* низ по центру/справа — управление */
+#botRight{right:2.2%;bottom:1.8%;display:flex;gap:.8cqw;align-items:center}
+
+/* ---------- Модальные подсказки ---------- */
+#modal{position:absolute;left:0;right:0;top:-60cqw;bottom:-60cqw;z-index:60;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(12,12,12,.74);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#modal.open{display:flex;animation:fade .22s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#modalBox{position:relative;width:min(88cqw,95vw);max-height:94vh;overflow:auto;background:#262626;border-radius:1.4cqw;
+  border:.13cqw solid rgba(255,255,255,.18);padding:2cqw 2.4cqw;
+  box-shadow:0 2cqw 6cqw rgba(0,0,0,.6);animation:pop .26s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{transform:scale(.94) translateY(1.5cqw);opacity:0}to{transform:none;opacity:1}}
+#modalBox h2{font-size:2.5cqw;letter-spacing:.14cqw;margin-bottom:.4cqw}
+#modalBox .sub{font-size:1.3cqw;color:rgba(255,255,255,.5);margin-bottom:1.5cqw;font-weight:600}
+.mcols{display:flex;gap:2.4cqw;align-items:flex-start}
+.mcol{flex:1 1 0;min-width:0}
+.mfig{flex:0 0 42%}
+#modalBox h3{font-size:1.5cqw;margin:1.2cqw 0 .55cqw;color:#f0c74a;letter-spacing:.05cqw}
+#modalBox h3:first-child{margin-top:0}
+#modalBox p,#modalBox li{font-size:1.32cqw;line-height:1.62;color:rgba(255,255,255,.88)}
+#modalBox ul{list-style:none}
+#modalBox li{position:relative;padding-left:1.7cqw;margin-bottom:.5cqw}
+#modalBox li:before{content:"";position:absolute;left:.25cqw;top:.75cqw;width:.6cqw;height:.6cqw;
+  border-radius:50%;background:#e0b028}
+#modalBox b{color:#fff}
+.note{background:rgba(224,176,40,.12);border-left:.35cqw solid #e0b028;padding:.9cqw 1.2cqw;
+  border-radius:.5cqw;margin-top:1.1cqw;font-size:1.3cqw;line-height:1.55}
+#modalClose{position:absolute;right:1.1cqw;top:1.1cqw;z-index:61}
+.msvg{width:100%;height:auto;display:block;background:rgba(0,0,0,.25);border-radius:1cqw;padding:.6cqw}
+.mcap{font-size:1.15cqw;color:rgba(255,255,255,.55);text-align:center;margin-top:.6cqw;font-weight:600}
+
+
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="field">
+
+  <div id="court">
+    <div class="frame"></div>
+    <div class="zoneBox" style="left:.55%;width:32.2%"></div>
+    <div class="zoneBox" style="left:33.9%;width:15.6%"></div>
+    <div class="zoneBox" style="left:50.5%;width:15.6%"></div>
+    <div class="zoneBox" style="left:67.25%;width:32.2%"></div>
+    <div id="sideTag">НАША СТОРОНА</div>
+    <div id="oppTag">СОПЕРНИК</div>
+    <div id="netline"></div>
+  </div>
+
+  <svg id="arrows" viewBox="0 0 720 360" preserveAspectRatio="none"></svg>
+  <div id="layer">
+    <div id="ball" style="left:50%;top:50%">
+      <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="#f7c948" stroke="#2b2b2b" stroke-width="3"/>
+      <path d="M32 3c-9 10-9 22-3 29 6 7 6 20 1 29M61 32c-12-3-22 2-27 9-5 7-16 10-26 8M9 10c3 12 12 19 21 20 9 1 17 9 20 18"
+        fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <!-- ВЕРХ СЛЕВА: ротация -->
+  <div class="ui" id="topLeft">
+    <button class="btn round" id="rotPrev" title="Предыдущая расстановка">&#9664;</button>
+    <div id="rotTitle">РОТАЦИЯ 1<small>ПЕРЕХОД ПО КРУГУ 1 → 2 → 3</small></div>
+    <button class="btn round" id="rotNext" title="Следующая расстановка">&#9654;</button>
+  </div>
+
+  <!-- ВЕРХ СПРАВА: режим -->
+  <div class="ui" id="topRight">
+    <div id="modeTitle">ПОДАЧА</div>
+  </div>
+
+  <!-- ВЕРХ ЦЕНТР: переключатель режима -->
+  <div class="ui" id="modeSwitch">
+    <div class="seg">
+      <button id="mServe" class="on">Мы подаём</button>
+      <button id="mRecv">Мы принимаем</button>
+    </div>
+  </div>
+
+  <!-- ПРАВАЯ ПАНЕЛЬ: шаги -->
+  <div class="ui" id="steps">
+    <h4>Ход розыгрыша</h4>
+    <div id="stepList"></div>
+    <div id="stepDesc"></div>
+    <div id="legend">
+      <div><i style="background:#d93a3a"></i>С — связующий</div>
+      <div><i style="background:#2a7fd4"></i>Д — доигровщик</div>
+      <div><i style="background:#2fa14d"></i>Ц — центральный</div>
+      <div><i style="background:#fff"></i>белая цифра — зона игрока</div>
+    </div>
+  </div>
+
+  <!-- НИЗ СЛЕВА: подсказки -->
+  <div class="ui" id="botLeft">
+    <button class="btn" id="hRules">Правила ротации</button>
+    <button class="btn" id="hIdea">Смысл схемы 4-2</button>
+  </div>
+
+  <!-- НИЗ СПРАВА: управление -->
+  <div class="ui" id="botRight">
+    <button class="btn" id="toZones">&#8635; В зоны</button>
+    <button class="btn" id="toggleStand">&#8644; Расстановка</button>
+    <button class="btn" id="ovlBtn" title="Показать, что никто никого не перекрывает">&#10003; Проверка расстановки</button>
+    <button class="btn round" id="prevStep" title="Шаг назад">&#9664;</button>
+    <button class="btn round" id="nextStep" title="Шаг вперёд">&#9654;</button>
+    <button class="btn accent" id="playAll">&#9654; Проиграть</button>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО -->
+  <div id="modal">
+    <button class="btn round" id="modalClose">&#10005;</button>
+    <div id="modalBox"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ======================= ДАННЫЕ ======================= */
+/* Система координат площадки: наша половина x 0..300, сетка x=300, соперник 300..600.
+   y 0..300 (0 — левая боковая для нас, 300 — правая). Поле отрисовки: x -60..660, y -30..330 */
+
+const P = {
+  S1:{ru:'С1', role:'setter',  color:'#d93a3a', name:'Связующий 1'},
+  S2:{ru:'С2', role:'setter',  color:'#8c1f1f', name:'Связующий 2'},
+  O1:{ru:'Д1', role:'outside', color:'#2a7fd4', name:'Доигровщик 1'},
+  O2:{ru:'Д2', role:'outside', color:'#16508a', name:'Доигровщик 2'},
+  M1:{ru:'Ц1', role:'middle',  color:'#2fa14d', name:'Центральный 1'},
+  M2:{ru:'Ц2', role:'middle',  color:'#17612f', name:'Центральный 2'}
+};
+const IDS = ['S1','S2','O1','O2','M1','M2'];
+
+/* Базовые точки зон */
+const Z = {1:[95,240], 2:[250,240], 3:[250,150], 4:[250,60], 5:[95,60], 6:[95,150]};
+const FRONT = z => z===2||z===3||z===4;
+
+/* Три расстановки 4-2 (зона -> игрок). Дальше всё повторяется со сменой связующего */
+const ROT = [
+  {1:'S1',2:'O1',3:'M1',4:'S2',5:'O2',6:'M2'},
+  {1:'O1',2:'M1',3:'S2',4:'O2',5:'M2',6:'S1'},
+  {1:'M1',2:'S2',3:'O2',4:'M2',5:'S1',6:'O1'}
+];
+
+/* Расстановка перед СВОЕЙ подачей (по зонам) */
+const SERVE_PREP = [
+  {1:[-40,250], 2:[232,186], 3:[268,152], 4:[232,118], 5:[85,55],  6:[95,150]},
+  {1:[-40,250], 2:[268,182], 3:[228,150], 4:[250,55],  5:[95,120], 6:[85,205]},
+  {1:[-40,250], 2:[266,235], 3:[232,158], 4:[262,105], 5:[95,110], 6:[95,175]}
+];
+/* Расстановка на ПРИЁМ подачи (по зонам) */
+const RECV_PREP = [
+  {1:[92,258], 2:[255,195], 3:[225,159], 4:[270,126], 5:[90,66], 6:[90,159]},
+  {1:[92,258], 2:[228,182], 3:[265,150], 4:[255,55],  5:[90,66], 6:[90,159]},
+  {1:[92,258], 2:[268,235], 3:[240,140], 4:[262,100], 5:[90,66], 6:[90,159]}
+];
+
+/* Целевые точки по амплуа */
+const BASE_DEF = {                 /* база в защите: доигровщики слева, центральные в центре, связующие справа */
+  front:{outside:[272,55], middle:[272,150], setter:[272,245]},
+  back: {outside:[70,55],  middle:[70,150],  setter:[70,245]}
+};
+const DEFENSE = {                  /* соперник атакует из своей 4-й зоны (нам — справа) */
+  front:{setter:[288,250], middle:[288,198], outside:[212,62]},
+  back: {setter:[150,252], middle:[48,150],  outside:[75,62]}
+};
+const COUNTER = {                  /* мяч поднят, выходим в контратаку */
+  front:{setter:[272,196], middle:[206,150], outside:[192,50]},
+  back: {setter:[115,248], middle:[72,150],  outside:[95,62]}
+};
+const ATTACK = {                   /* момент атаки из 4-й зоны + страховка */
+  front:{setter:[266,205], middle:[232,150], outside:[276,44]},
+  back: {setter:[168,222], middle:[120,132], outside:[196,88]}
+};
+const RECV_ATTACK = {              /* после приёма: передняя линия бежит на атаку */
+  front:{setter:[272,196], middle:[214,150], outside:[196,50]}
+};
+const RECV_SET = {
+  front:{setter:[270,198], middle:[248,150], outside:[272,44]}
+};
+
+/* Тексты расстановок */
+const TXT_SERVE_PREP = [
+ 'Связующий <b>С1</b> из 1-й зоны уходит подавать — на подающего правило расстановки не действует. Передняя линия собирается «стопкой» в центре: <b>Ц1 ближе всех к сетке</b>, он блокирует по всей ширине. За ним прячутся С2 и Д1 — после удара по мячу они разбегутся крест-накрест: доигровщик налево, связующий направо.',
+ 'Подаёт доигровщик <b>Д1</b>. Впереди <b>Д2 уже слева</b> — ему бежать некуда. А <b>Ц1 и С2 стоят крест-накрест</b>: центральному после подачи нужно в центр, связующему — направо к сетке. Ц1 держится ближе к сетке, чтобы успеть на блок.',
+ 'Подаёт центральный <b>Ц1</b>. Впереди меняются местами <b>Ц2 и Д2</b>, а связующий <b>С2 уже стоит справа</b> у сетки. Сзади тоже перебежка: <b>С1 уходит направо, Д1 — налево</b>, поэтому они стоят рядом в центре задней линии.'
+];
+const TXT_RECV_PREP = [
+ 'Принимают трое задних: <b>Д2, Ц2 и С1</b>. Передняя тройка собрана в центре: <b>С2 и Д1 бегут крест-накрест</b> — связующий направо к сетке, доигровщик налево на 4-ю зону. <b>Ц1 стоит у линии атаки</b>, чтобы сразу уйти на разбег.',
+ '<b>Д2 уже слева</b> — ему бежать недалеко, он первый готов к атаке. <b>С2 и Ц1 стоят рядом</b> и после подачи меняются: связующий уходит направо к сетке, центральный — в центр. Ц1 держится у линии атаки для разбега.',
+ 'Самая простая расстановка: <b>С2 уже стоит справа у сетки</b> и никуда не бежит. Меняются только <b>Ц2 и Д2</b>: центральный в центр, доигровщик налево. Задняя линия стоит в своём порядке и принимает.'
+];
+
+/* ======================= ПОСТРОЕНИЕ ШАГОВ ======================= */
+function basePos(r){ const m={}; for(let z=1;z<=6;z++) m[ROT[r][z]] = Z[z].slice(); return m; }
+function prepPos(r,src){ const m={}; for(let z=1;z<=6;z++) m[ROT[r][z]] = src[r][z].slice(); return m; }
+function byRole(r,table,keepBack){
+  const m={};
+  for(let z=1;z<=6;z++){
+    const id=ROT[r][z], line=FRONT(z)?'front':'back';
+    if(line==='back' && keepBack){ m[id]=keepBack[z].slice(); continue; }
+    m[id]=table[line][P[id].role].slice();
+  }
+  return m;
+}
+function zoneOf(r,id){ for(let z=1;z<=6;z++) if(ROT[r][z]===id) return z; }
+
+function buildSteps(mode,r){
+  const rot=ROT[r], S=[];
+  const backKeep = {}; for(let z of [1,5,6]) backKeep[z]=RECV_PREP[r][z];
+  const server = rot[1];
+
+  if(mode==='serve'){
+    S.push({t:'Расстановка по зонам', ball:[-48,258],
+      pos:basePos(r), hl:[],
+      d:'Так расстановка выглядит «на бумаге»: каждый игрок в своей зоне. По этим местам судья определяет порядок перехода, но <b>стоять так во время игры не обязательно</b> — важно лишь взаимное расположение в момент подачи. Не путай это с <b>базой</b> — реальными местами в защите (шаг 4).'});
+    S.push({t:'Перед подачей', ball:[-42,284], pos:prepPos(r,SERVE_PREP), hl:[server],
+      d:TXT_SERVE_PREP[r]});
+    S.push({t:'Подача', ball:[386,132], pos:prepPos(r,SERVE_PREP), hl:[server],
+      d:'Удар по мячу. <b>С этого момента правило расстановки не действует</b> — все шесть игроков могут бежать куда угодно. Подающий заходит на площадку.'});
+    S.push({t:'База в защите', ball:[352,100], pos:byRole(r,BASE_DEF), hl:[],
+      d:'<b>База</b> — это шесть стартовых мест в защите, куда команда возвращается каждый раз, когда мяч уходит на сторону соперника. Делится на три полосы: <b>доигровщики слева</b> (зоны 4 и 5), <b>центральные в центре</b> (3 и 6), <b>связующий и правый справа</b> (2 и 1). Передние — у сетки, задние — в глубине. База <b>одна и та же во всех трёх расстановках</b>, поэтому после подачи все бегут на знакомые места.'});
+    S.push({t:'Атака соперника — защита', ball:[342,264], pos:byRole(r,DEFENSE), hl:[],
+      d:'Соперник атакует из своей 4-й зоны. Двое у сетки ставят <b>блок</b>, передний доигровщик <b>оттягивается</b> от сетки под скидку, задняя линия расходится по площадке: зона 1 — за блоком по линии, зона 5 — по диагонали, зона 6 — в глубине.'});
+    S.push({t:'Доигровка: выход связующего', ball:[248,176], pos:byRole(r,COUNTER), hl:[rot[2],rot[3],rot[4]].filter(id=>P[id].role==='setter'),
+      d:'Мяч подняли. <b>Пасует передний связующий</b> — он просто выходит к сетке между 2-й и 3-й зоной, бежать с задней линии никому не нужно. Центральный и доигровщик уходят на разбег.'});
+    S.push({t:'Атака и страховка', ball:[388,208], pos:byRole(r,ATTACK), hl:[],
+      d:'Атака из 4-й зоны, остальные — на <b>страховке</b> вокруг нападающего. Выиграли мяч на своей подаче — расстановка не меняется, подаём снова. Проиграли — подаёт соперник, и мы переходим к <b>приёму</b>.'});
+  } else {
+    S.push({t:'Расстановка по зонам', ball:[392,52], pos:basePos(r), hl:[],
+      d:'Расстановка по зонам — «на бумаге», формальный порядок для судьи. Перед приёмом игроки встанут иначе, но <b>порядок относительно соседей нарушать нельзя</b> до удара по мячу. Это не «база» — база это места в защите (шаг 7).'});
+    S.push({t:'Расстановка на приём', ball:[392,52], pos:prepPos(r,RECV_PREP), hl:[],
+      d:TXT_RECV_PREP[r]});
+    S.push({t:'Подача соперника', ball:[124,182], pos:prepPos(r,RECV_PREP), hl:[rot[6]],
+      d:'Соперник подал. <b>До касания мяча подающим перебегать нельзя</b> — судья сравнивает положение ступней. После удара расстановка «распадается».'});
+    S.push({t:'Приём — пас связующему', ball:[250,176],
+      pos:Object.assign(prepPos(r,RECV_PREP), byRole(r,RECV_ATTACK,backKeep)), hl:[rot[2],rot[3],rot[4]],
+      d:'Приём идёт на <b>переднего связующего</b>: он уже у сетки между 2-й и 3-й зоной. Центральный и доигровщик на бегу разбегаются крест-накрест — и <b>обязательно смотрят на мяч</b>, иначе пас прилетит за спину.'});
+    S.push({t:'Передача на край', ball:[290,20],
+      pos:Object.assign(prepPos(r,RECV_PREP), byRole(r,RECV_SET,backKeep)), hl:[rot[2],rot[3],rot[4]].filter(id=>P[id].role==='outside'),
+      d:'Связующий отдаёт мяч. В схеме 4-2 у него <b>только два нападающих</b>: доигровщик в 4-й зоне и центральный в 3-й. Задняя линия остаётся на страховке.'});
+    S.push({t:'Атака и страховка', ball:[390,216],
+      pos:Object.assign(prepPos(r,RECV_PREP), byRole(r,RECV_SET,backKeep)), hl:[],
+      d:'Атака из 4-й зоны. Задние игроки поджимаются под нападающего — это <b>страховка</b>: если блок соперника отобьёт мяч назад, его надо поднять.'});
+    S.push({t:'Переход в защиту', ball:[360,150], pos:byRole(r,BASE_DEF), hl:[],
+      d:'Мяч ушёл к сопернику — команда возвращается в <b>базу</b>: доигровщики слева, центральные в центре, связующий и правый справа; передние у сетки, задние в глубине. Из базы уже читают атаку и двигаются на блок или в защиту. Выиграли розыгрыш — <b>переход по часовой стрелке</b> и следующая расстановка.'});
+  }
+  return S;
+}
+
+/* ======================= ОТРИСОВКА ======================= */
+const FX = x => (x+60)/720*100, FY = y => (y+30)/360*100;
+const layer=document.getElementById('layer'), ball=document.getElementById('ball'),
+      arrows=document.getElementById('arrows'), stepList=document.getElementById('stepList'),
+      stepDesc=document.getElementById('stepDesc');
+
+let state={mode:'serve', rot:0, step:0, steps:[], playing:null, overlap:false};
+const nodes={};
+
+/* сетка из точек */
+(function(){ const n=document.getElementById('netline');
+  for(let i=0;i<16;i++) n.appendChild(document.createElement('i')); })();
+
+IDS.forEach(id=>{
+  const el=document.createElement('div');
+  el.className='player'; el.style.background=P[id].color;
+  el.innerHTML='<span>'+P[id].ru+'</span><span class="zbadge"></span><span class="tip">'+P[id].name+'</span>';
+  layer.appendChild(el); nodes[id]=el;
+});
+
+function rebuild(keepStep){
+  state.steps=buildSteps(state.mode,state.rot);
+  if(!keepStep) state.step=0;
+  state.step=Math.min(state.step,state.steps.length-1);
+  document.getElementById('rotTitle').firstChild.textContent='РОТАЦИЯ '+(state.rot+1);
+  document.getElementById('modeTitle').textContent = state.mode==='serve'?'ПОДАЧА':'ПРИЁМ ПОДАЧИ';
+  stepList.innerHTML='';
+  state.steps.forEach((s,i)=>{
+    const row=document.createElement('div'); row.className='stepRow';
+    row.innerHTML='<div class="num">'+(i+1)+'</div><div class="lbl">'+s.t+'</div>';
+    row.onclick=()=>{stop(); go(i);};
+    stepList.appendChild(row);
+  });
+  render();
+}
+
+function render(){
+  const s=state.steps[state.step], prev= state.step>0 ? state.steps[state.step-1] : null;
+  const server = state.mode==='serve' ? ROT[state.rot][1] : null;
+  IDS.forEach(id=>{
+    const p=s.pos[id], el=nodes[id], z=zoneOf(state.rot,id);
+    const moved = prev && (Math.abs(prev.pos[id][0]-p[0])>14 || Math.abs(prev.pos[id][1]-p[1])>14);
+    el.style.left=FX(p[0])+'%'; el.style.top=FY(p[1])+'%';
+    el.classList.toggle('moving',!!moved);
+    el.classList.toggle('hl', s.hl.indexOf(id)>=0);
+    el.classList.toggle('srv', id===server && state.step<=2);
+    el.querySelector('.zbadge').textContent=z;
+  });
+  ball.style.left=FX(s.ball[0])+'%'; ball.style.top=FY(s.ball[1])+'%';
+  const canCheck = state.step<=1;
+  const ob=document.getElementById('ovlBtn');
+  ob.classList.toggle('on', state.overlap && canCheck);
+  ob.disabled = !canCheck;
+  document.getElementById('field').classList.toggle('check', state.overlap && canCheck);
+  drawArrows(prev,s);
+  [...stepList.children].forEach((r,i)=>{
+    r.classList.toggle('on',i===state.step); r.classList.toggle('done',i<state.step);
+  });
+  stepDesc.innerHTML = s.d + ((state.overlap && canCheck) ?
+    '<div style="margin-top:.6cqw;font-size:1.06cqw;line-height:1.45;color:rgba(255,255,255,.72)">'+
+    '<div><span style="color:#5ec8ff">&#9632;</span> по глубине: передний ближе к сетке, чем его задний</div>'+
+    '<div><span style="color:#8ce06a">&#9632;</span> поперёк: порядок в линии не нарушен</div>'+
+    (state.mode==='serve'?'<div style="opacity:.75">подающий от правила расстановки свободен</div>':'')+
+    '</div>' : '');
+  document.getElementById('prevStep').disabled = state.step===0;
+  document.getElementById('nextStep').disabled = state.step===state.steps.length-1;
+}
+
+/* ---------- «упор в барьер»: две стрелки навстречу и перегородка ---------- */
+function barrierSVG(ax,ay,bx,by,col,off,ox,oy){
+  const dx=bx-ax, dy=by-ay, D=Math.hypot(dx,dy);
+  if(!D) return '';
+  const ux=dx/D, uy=dy/D, px=-uy, py=ux;
+  const x1=ax+ux*off, y1=ay+uy*off, x2=bx-ux*off, y2=by-uy*off;
+  const len=D-2*off;
+  if(len<5) return '';
+  const half=len/2, mx=(x1+x2)/2, my=(y1+y2)/2;
+  const head=Math.min(10,half*0.66), hw=head*0.58,
+        gap=Math.min(2.5,half*0.14), barH=Math.max(5,Math.min(10,half*0.75));
+  let out='<path d="M'+(mx+px*barH+ox)+' '+(my+py*barH+oy)+'L'+(mx-px*barH+ox)+' '+(my-py*barH+oy)+
+          '" stroke="'+col+'" stroke-width="3.6" stroke-linecap="round"/>';
+  [[x1,y1],[x2,y2]].forEach(function(e){
+    const vx=(mx-e[0]), vy=(my-e[1]), l=Math.hypot(vx,vy);
+    if(!l) return;
+    const nx=vx/l, ny=vy/l;
+    const tx=mx-nx*gap, ty=my-ny*gap, bx0=tx-nx*head, by0=ty-ny*head;
+    out+='<path d="M'+(tx+ox)+' '+(ty+oy)+'L'+(bx0+px*hw+ox)+' '+(by0+py*hw+oy)+
+         'L'+(bx0-px*hw+ox)+' '+(by0-py*hw+oy)+'z" fill="'+col+'"/>';
+    if(l-gap-head>2.5)
+      out+='<path d="M'+(e[0]+ox)+' '+(e[1]+oy)+'L'+(bx0+ox)+' '+(by0+oy)+
+           '" stroke="'+col+'" stroke-width="2.9" stroke-linecap="round"/>';
+  });
+  return out;
+}
+
+/* проверка расстановки: стрелки напрямую между соседями */
+function overlapSVG(pos,r,mode){
+  const rot=ROT[r], skip=(mode==='serve')?1:0, OFF=12;
+  let out='';
+  [[4,5],[3,6],[2,1]].forEach(function(pr){          /* по глубине: передний — ближе к сетке */
+    if(pr[1]===skip) return;
+    const B=pos[rot[pr[1]]], F=pos[rot[pr[0]]];
+    out+=barrierSVG(B[0],B[1],F[0],F[1],'#5ec8ff',OFF,60,30);
+  });
+  [[4,3],[3,2],[5,6],[6,1]].forEach(function(pr){    /* порядок внутри линии */
+    if(pr[0]===skip||pr[1]===skip) return;
+    const A=pos[rot[pr[0]]], B=pos[rot[pr[1]]];
+    out+=barrierSVG(A[0],A[1],B[0],B[1],'#8ce06a',OFF,60,30);
+  });
+  return out;
+}
+
+function drawArrows(prev,s){
+  const check = state.overlap && state.step<=1;
+  let out='<defs><marker id="ah" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" '+
+    'markerHeight="5.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ffd54a"/></marker></defs>';
+  if(prev && !check){
+    IDS.forEach(function(id){
+      const a=prev.pos[id], b=s.pos[id];
+      const dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
+      if(len<16) return;
+      const R=21, ux=dx/len, uy=dy/len;
+      const x1=a[0]+ux*R, y1=a[1]+uy*R, x2=b[0]-ux*R, y2=b[1]-uy*R;
+      if(Math.hypot(x2-x1,y2-y1)<6) return;
+      const mx=(x1+x2)/2-uy*len*0.13, my=(y1+y2)/2+ux*len*0.13;
+      out+='<path class="mv" d="M'+(x1+60)+' '+(y1+30)+' Q'+(mx+60)+' '+(my+30)+' '+(x2+60)+' '+(y2+30)+
+           '" stroke="#ffd54a" stroke-width="3.2" stroke-dasharray="9 7" opacity=".85" marker-end="url(#ah)"/>';
+    });
+  }
+  if(check) out+=overlapSVG(s.pos,state.rot,state.mode);
+  arrows.innerHTML=out;
+  arrows.querySelectorAll('path.mv').forEach(function(pt){
+    pt.animate([{strokeDashoffset:32},{strokeDashoffset:0}],{duration:900,iterations:Infinity});
+  });
+}
+
+function go(i){ state.step=Math.max(0,Math.min(i,state.steps.length-1)); render(); }
+function stop(){ if(state.playing){clearInterval(state.playing); state.playing=null;
+  document.getElementById('playAll').innerHTML='&#9654; Проиграть';} }
+function play(){
+  if(state.playing){stop();return;}
+  if(state.step>=state.steps.length-1) go(0);
+  document.getElementById('playAll').innerHTML='&#10074;&#10074; Пауза';
+  state.playing=setInterval(()=>{
+    if(state.step>=state.steps.length-1){stop();return;}
+    go(state.step+1);
+  },1900);
+}
+
+/* ======================= УПРАВЛЕНИЕ ======================= */
+document.getElementById('rotNext').onclick=()=>{stop(); state.rot=(state.rot+1)%3; rebuild(true);};
+document.getElementById('rotPrev').onclick=()=>{stop(); state.rot=(state.rot+2)%3; rebuild(true);};
+document.getElementById('mServe').onclick=()=>{stop(); setMode('serve');};
+document.getElementById('mRecv').onclick=()=>{stop(); setMode('recv');};
+function setMode(m){
+  state.mode=m;
+  document.getElementById('mServe').classList.toggle('on',m==='serve');
+  document.getElementById('mRecv').classList.toggle('on',m==='recv');
+  rebuild(true);
+}
+document.getElementById('toZones').onclick=()=>{stop(); go(0);};
+document.getElementById('toggleStand').onclick=()=>{stop(); go(state.step===0?1:0);};
+document.getElementById('prevStep').onclick=()=>{stop(); go(state.step-1);};
+document.getElementById('nextStep').onclick=()=>{stop(); go(state.step+1);};
+document.getElementById('ovlBtn').onclick=()=>{ state.overlap=!state.overlap; render(); };
+document.getElementById('playAll').onclick=play;
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'){stop();go(state.step+1);}
+  if(e.key==='ArrowLeft'){stop();go(state.step-1);}
+  if(e.key===' '){e.preventDefault();play();}
+  if(e.key==='Escape') closeModal();
+});
+
+/* ======================= ПОДСКАЗКИ ======================= */
+const modal=document.getElementById('modal'), modalBox=document.getElementById('modalBox');
+document.getElementById('modalClose').onclick=closeModal;
+modal.onclick=e=>{ if(e.target===modal) closeModal(); };
+function closeModal(){ modal.classList.remove('open'); }
+const closeBtn=document.getElementById('modalClose');
+function openModal(html){ modalBox.innerHTML=html; modalBox.appendChild(closeBtn); modal.classList.add('open'); modalBox.scrollTop=0; }
+
+/* схема половины площадки: зоны, переход, пары перекрытия */
+function svgZones(opts){
+  const o=Object.assign({loop:false,order:false,labels:null,pairs:false,opp:false,bands:false},opts||{});
+  const Zc={1:[110,240],2:[305,240],3:[305,155],4:[305,70],5:[110,70],6:[110,155]};
+  let s='<svg class="msvg" viewBox="0 0 400 305">';
+  s+='<rect x="18" y="18" width="364" height="264" rx="6" fill="none" stroke="#fff" stroke-width="5"/>';
+  s+='<line x1="262" y1="18" x2="262" y2="282" stroke="#fff" stroke-width="3" opacity=".7"/>';
+  s+='<line x1="384" y1="6" x2="384" y2="294" stroke="#fff" stroke-width="4" stroke-dasharray="5 9" opacity=".9"/>';
+  s+='<text x="376" y="302" fill="#fff" opacity=".5" font-size="13" font-weight="700" text-anchor="end">СЕТКА</text>';
+  if(o.bands){
+    [[18,112.5,'#2a7fd4','ДОИГРОВЩИКИ'],[112.5,197.5,'#2fa14d','ЦЕНТРАЛЬНЫЕ'],
+     [197.5,282,'#d93a3a','СВЯЗУЮЩИЙ / ПРАВЫЙ']].forEach(function(b){
+      s+='<rect x="20" y="'+b[0]+'" width="360" height="'+(b[1]-b[0])+'" fill="'+b[2]+'" opacity=".2"/>';
+      s+='<text x="200" y="'+((b[0]+b[1])/2-32)+'" text-anchor="middle" fill="#fff" opacity=".65" '+
+         'font-size="12" font-weight="800" letter-spacing="1.2">'+b[3]+'</text>';
+    });
+  }
+  if(o.loop){
+    [[1,6],[6,5],[5,4],[4,3],[3,2],[2,1]].forEach(function(pr){
+      const A=Zc[pr[0]],B=Zc[pr[1]],dx=B[0]-A[0],dy=B[1]-A[1],L=Math.hypot(dx,dy),R=30;
+      const x1=A[0]+dx/L*R,y1=A[1]+dy/L*R,x2=B[0]-dx/L*R,y2=B[1]-dy/L*R;
+      const mx=(x1+x2)/2-dy/L*L*0.15,my=(y1+y2)/2+dx/L*L*0.15;
+      s+='<path d="M'+x1+' '+y1+' Q'+mx+' '+my+' '+x2+' '+y2+'" fill="none" stroke="#ffd54a" stroke-width="3.5" stroke-dasharray="8 6" marker-end="url(#mah)"/>';
+    });
+  }
+  if(o.pairs){
+    [[4,5],[3,6],[2,1]].forEach(function(pr){
+      const F=Zc[pr[0]],B=Zc[pr[1]];
+      s+=barrierSVG(B[0],B[1],F[0],F[1],'#5ec8ff',27,0,0);
+    });
+  }
+  if(o.opp){   /* диагонали: кто кому «противоположный» */
+    [[4,5],[3,6],[2,1]].forEach(function(pr){
+      const F=Zc[pr[0]],B=Zc[pr[1]];
+      s+='<path d="M'+(B[0]+27)+' '+B[1]+'L'+(F[0]-27)+' '+F[1]+'" stroke="#ffd54a" stroke-width="3" '+
+         'stroke-dasharray="7 6" opacity=".9" marker-start="url(#mahs)" marker-end="url(#mah)"/>';
+    });
+  }
+  if(o.order){
+    [[4,3],[3,2],[5,6],[6,1]].forEach(function(pr){
+      s+=barrierSVG(Zc[pr[0]][0],Zc[pr[0]][1],Zc[pr[1]][0],Zc[pr[1]][1],'#8ce06a',27,0,0);
+    });
+  }
+  for(let z=1;z<=6;z++){
+    const c=Zc[z],lab=o.labels?o.labels[z]:null;
+    s+='<circle cx="'+c[0]+'" cy="'+c[1]+'" r="24" fill="'+(lab?lab.color:'#6a6a6a')+'" stroke="#fff" stroke-width="3"/>';
+    s+='<text x="'+c[0]+'" y="'+(c[1]+7)+'" text-anchor="middle" fill="#fff" font-size="'+(lab?17:21)+'" font-weight="800">'+(lab?lab.t:z)+'</text>';
+    if(lab){
+      s+='<circle cx="'+(c[0]+20)+'" cy="'+(c[1]-20)+'" r="10.5" fill="#fff"/>';
+      s+='<text x="'+(c[0]+20)+'" y="'+(c[1]-16)+'" text-anchor="middle" fill="#2b2b2b" font-size="13" font-weight="800">'+z+'</text>';
+    }
+  }
+  s+='<defs><marker id="mah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffd54a"/></marker>';
+  s+='<marker id="mahs" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ffd54a"/></marker>';
+  s+='</defs></svg>';
+  return s;
+}
+
+const HTML_RULES =
+'<h2>ПРАВИЛА РОТАЦИИ</h2><div class="sub">Зоны, переход и правило расстановки</div>'+
+'<div class="mcols"><div class="mcol">'+
+'<h3>Шесть зон</h3><ul>'+
+'<li><b>1</b> — правая задняя, из неё подают. <b>2</b> — правая передняя, <b>3</b> — центр у сетки, <b>4</b> — левая передняя, <b>5</b> — левая задняя, <b>6</b> — центр сзади.</li>'+
+'<li>Зоны нумеруются <b>против часовой стрелки</b>, а переход идёт <b>по часовой</b>.</li>'+
+'<li>Маленький белый кружок у игрока на схеме — это его текущая зона.</li></ul>'+
+'<h3>Когда команда переходит</h3><ul>'+
+'<li>Переход делают <b>только выиграв право подачи</b> — когда забрали мяч на подаче соперника.</li>'+
+'<li>Все смещаются на одну зону: 2&rarr;1, 3&rarr;2, 4&rarr;3, 5&rarr;4, 6&rarr;5, 1&rarr;6.</li>'+
+'<li>Игрок, попавший в зону 1, уходит подавать.</li></ul>'+
+'<h3>Правило расстановки (перекрытие)</h3><ul>'+
+'<li>Проверяется <b>только в момент удара по мячу на подаче</b>, и только по положению ступней.</li>'+
+'<li><span style="color:#6fd3ff"><b>По глубине</b></span> (синие стрелки): каждый передний игрок стоит <b>ближе к сетке</b>, чем его задний. Пары <b>4&ndash;5</b>, <b>3&ndash;6</b>, <b>2&ndash;1</b>.</li>'+
+'<li><span style="color:#8ce06a"><b>Поперёк площадки</b></span> (зелёные стрелки): внутри линии нельзя меняться местами. Впереди порядок <b>4&ndash;3&ndash;2</b>, сзади <b>5&ndash;6&ndash;1</b>.</li>'+
+'<li>То есть перекрытия не должно быть <b>ни в одном из двух направлений</b> сразу: ни вдоль площадки, ни поперёк.</li>'+
+'<li>Сравнивают только соседей: с игроком «через одного» пересекаться можно — например, зона 4 может оказаться правее зоны 1.</li>'+
+'<li><b>Подающий от правила свободен</b> — он вне площадки.</li></ul>'+
+'<div class="note">Сразу после удара по мячу ограничения исчезают — бежать можно куда угодно. Именно на этом построена схема 4-2: игроки встают «стопкой» и разбегаются крест-накрест.</div>'+
+'<h3>Чего нельзя задней линии</h3><ul>'+
+'<li>Атаковать выше края сетки, стоя перед линией атаки.</li>'+
+'<li>Участвовать в блоке.</li></ul>'+
+'</div><div class="mfig">'+
+svgZones({loop:true})+'<div class="mcap">Переход по часовой: 1&rarr;6&rarr;5&rarr;4&rarr;3&rarr;2&rarr;1</div>'+
+svgZones({pairs:true,order:true})+'<div class="mcap"><span style="color:#6fd3ff">Синие</span> — передний ближе к сетке (4&ndash;5, 3&ndash;6, 2&ndash;1). '+
+'<span style="color:#8ce06a">Зелёные</span> — порядок внутри линии (4&ndash;3&ndash;2 и 5&ndash;6&ndash;1)</div>'+
+'</div></div>';
+
+const HTML_IDEA =
+'<h2>СМЫСЛ СХЕМЫ 4-2</h2><div class="sub">4 нападающих + 2 связующих</div>'+
+'<div class="mcols"><div class="mcol">'+
+'<h3>Главная идея</h3><ul>'+
+'<li>В команде <b>два связующих, и они стоят по диагонали</b> — через три зоны друг от друга.</li>'+
+'<li>Поэтому <b>один связующий всегда в передней линии</b>, в какой бы расстановке команда ни стояла.</li>'+
+'<li>Пасует <b>всегда передний связующий</b>: ему не нужно выбегать с задней линии, он просто смещается к сетке между 2-й и 3-й зоной.</li>'+
+'<li>Второй связующий в это время играет сзади как обычный защитник и принимает подачу.</li></ul>'+
+'<h3>Найди своего «противоположного»</h3><ul>'+
+'<li>Связующий напротив связующего, доигровщик напротив доигровщика, центральный напротив центрального.</li>'+
+'<li>Знаешь, где твой противоположный, — всегда найдёшь своё место в любой расстановке.</li></ul>'+
+'<h3>Почему расстановок всего три</h3><ul>'+
+'<li>Через три перехода у сетки оказывается второй связующий, и картинка <b>повторяется</b> — просто связующие меняются ролями.</li>'+
+'<li>Поэтому учить надо только расстановки 1, 2 и 3, дальше всё идёт по кругу.</li></ul>'+
+'<h3>Плюсы и минусы</h3><ul>'+
+'<li><b>+</b> Простая схема, минимум перебежек — лучший старт для начинающей команды.</li>'+
+'<li><b>+</b> Пас всегда из одной точки, нападающим проще привыкнуть.</li>'+
+'<li><b>&minus;</b> В атаке <b>всегда только два нападающих</b>: связующий занимает место третьего у сетки.</li>'+
+'<li><b>&minus;</b> Невысокий связующий ослабляет блок в зоне 2.</li></ul>'+
+'<div class="note">Для сравнения: в схеме 5-1 связующий один и выбегает с задней линии — тогда в атаке бывает три нападающих, но и перебежек намного больше.</div>'+
+'<h3>Что такое «база»</h3><ul>'+
+'<li><b>База — это шесть стартовых мест в защите</b>, куда команда возвращается каждый раз, как только мяч уходит на сторону соперника.</li>'+
+'<li>Площадка делится на три полосы вдоль: <b>доигровщики слева</b> (зоны 4 и 5), <b>центральные в центре</b> (3 и 6), <b>связующий и правый справа</b> (2 и 1). Передние стоят у сетки, задние — в глубине.</li>'+
+'<li>База <b>одинакова во всех трёх расстановках</b>. Поэтому после удара по мячу игроку не надо думать: он просто бежит в свою полосу.</li>'+
+'<li>Не путай: <b>расстановка по зонам</b> — формальный порядок для судьи, <b>база</b> — реальные места на площадке.</li>'+
+'<li>В 4-2 передний связующий приходит в базу <b>справа у сетки (зона 2)</b> — оттуда он и пасует, поэтому выбегать ему никуда не нужно.</li>'+
+'<li>Из базы игроки уже двигаются по ситуации: на блок, в защиту, на страховку — и снова возвращаются в базу.</li></ul>'+
+'</div><div class="mfig">'+
+svgZones({bands:true,labels:{4:{t:'Д',color:'#16508a'},5:{t:'Д',color:'#2a7fd4'},3:{t:'Ц',color:'#17612f'},6:{t:'Ц',color:'#2fa14d'},2:{t:'С',color:'#8c1f1f'},1:{t:'С',color:'#d93a3a'}}})+
+'<div class="mcap">База: три полосы по амплуа. Сюда команда возвращается в каждом розыгрыше</div>'+
+svgZones({labels:{1:{t:'С1',color:'#d93a3a'},2:{t:'Д1',color:'#2a7fd4'},3:{t:'Ц1',color:'#2fa14d'},4:{t:'С2',color:'#8c1f1f'},5:{t:'Д2',color:'#16508a'},6:{t:'Ц2',color:'#17612f'}},opp:true})+
+'<div class="mcap">Расстановка 1: связующие в зонах 1 и 4 — по диагонали. Пасует С2, он впереди</div>'+
+svgZones({labels:{1:{t:'Д1',color:'#2a7fd4'},2:{t:'Ц1',color:'#2fa14d'},3:{t:'С2',color:'#8c1f1f'},4:{t:'Д2',color:'#16508a'},5:{t:'Ц2',color:'#17612f'},6:{t:'С1',color:'#d93a3a'}},opp:true})+
+'<div class="mcap">Расстановка 2: перешли на зону — С2 по-прежнему впереди, теперь в зоне 3</div>'+
+'</div></div>';
+
+document.getElementById('hRules').onclick=function(){ openModal(HTML_RULES); };
+document.getElementById('hIdea').onclick=function(){ openModal(HTML_IDEA); };
+
+rebuild();
+</script>
+</body>
+</html>
