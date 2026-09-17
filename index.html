@@ -21,21 +21,8 @@ body{
   container-type:size;container-name:field;
 }
 
-/* ---------- Площадка ---------- */
-#court{position:absolute;left:8.333%;top:18.75%;width:83.333%;height:66.964%}
-.frame{position:absolute;inset:0;border:1.05cqw solid #fff;border-radius:.5cqw;
-  box-shadow:0 1.4cqw 3cqw rgba(0,0,0,.35)}
-.zoneBox{position:absolute;top:.9cqw;bottom:.9cqw;background:#8f8f8f;border-radius:.2cqw;
-  box-shadow:inset 0 0 4cqw rgba(0,0,0,.14)}
-.divider{position:absolute;top:0;bottom:0;width:.75cqw;background:#fff}
-#netline{position:absolute;left:calc(50% - .32cqw);top:-4cqw;bottom:-4cqw;width:.64cqw;
-  display:flex;flex-direction:column;justify-content:space-between;align-items:center;pointer-events:none}
-#netline i{display:block;width:1.3cqw;height:1.3cqw;border-radius:50%;background:#fff;
-  box-shadow:0 .2cqw .5cqw rgba(0,0,0,.3)}
-#sideTag{position:absolute;left:.4cqw;top:-2.7cqw;font-size:1.3cqw;letter-spacing:.34cqw;
-  color:rgba(255,255,255,.42);font-weight:700}
-#oppTag{position:absolute;right:.4cqw;top:-2.7cqw;font-size:1.3cqw;letter-spacing:.34cqw;
-  color:rgba(255,255,255,.42);font-weight:700}
+/* ---------- Площадка (рисуется в SVG, чтобы разворачиваться в портрет) ---------- */
+#board{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
 
 /* ---------- Игроки ---------- */
 #layer{position:absolute;inset:0;pointer-events:none}
@@ -130,6 +117,8 @@ body{
 .stepRow.on .num{background:#e0b028;color:#2a2000}
 .stepRow.on .lbl{color:#fff;font-weight:800}
 .stepRow.done .num{background:rgba(224,176,40,.35);color:#f4d98a}
+#stepNow{display:none}
+.ovlLeg{margin-top:.6cqw;font-size:1.06cqw;line-height:1.45;color:rgba(255,255,255,.72)}
 #stepDesc{margin-top:.75cqw;padding-top:.7cqw;border-top:.13cqw solid rgba(255,255,255,.16);
   font-size:1.17cqw;line-height:1.45;color:rgba(255,255,255,.9)}
 #legend{margin-top:.7cqw;padding-top:.6cqw;border-top:.13cqw solid rgba(255,255,255,.12);
@@ -172,24 +161,68 @@ body{
 .mcap{font-size:1.15cqw;color:rgba(255,255,255,.55);text-align:center;margin-top:.6cqw;font-weight:600}
 
 
+/* ================= ПОРТРЕТ (телефон) ================= */
+@media (max-aspect-ratio: 1/1){
+  #field{aspect-ratio:344/840;width:min(100vw, 41vh)}
+
+  .player{width:11.2cqw;height:11.2cqw;font-size:4.3cqw}
+  .player .zbadge{width:5.3cqw;height:5.3cqw;font-size:2.85cqw;top:-2.2cqw;right:-2.2cqw}
+  .player .tip{display:none}
+  #ball{width:8.6cqw;height:8.6cqw}
+
+  .btn{height:7.2cqw;padding:0 2.2cqw;font-size:2.55cqw;border-radius:1.7cqw;letter-spacing:0}
+  .btn.round{width:7.2cqw;height:7.2cqw;font-size:3.1cqw}
+  .btn.round.big{width:8.6cqw;height:8.6cqw;font-size:3.7cqw}
+
+  #topLeft{left:4%;top:.9%;gap:2.4cqw}
+  #rotTitle{font-size:6.8cqw;letter-spacing:.45cqw;min-width:0}
+  #rotTitle small{font-size:2.5cqw;letter-spacing:.12cqw;padding:.8cqw 1.5cqw;margin-top:1.1cqw}
+  #topRight{display:none}
+
+  #modeSwitch{left:50%;top:86.2%;transform:translateX(-50%)}
+  .seg{border-radius:1.7cqw}
+  .seg button{font-size:2.55cqw;padding:2cqw 4.4cqw;letter-spacing:0}
+
+  #steps{left:4.5%;right:4.5%;top:7.6%;width:auto;transform:none;
+         padding:2.2cqw 2.6cqw 2.4cqw;border-radius:2.2cqw}
+  #steps h4{display:none}
+  #legend{display:none}
+  #stepList{display:flex;gap:1cqw}
+  .stepRow{flex:1 1 0;padding:.4cqw 0;justify-content:center;gap:0}
+  .stepRow .lbl{display:none}
+  .stepRow .num{width:5.6cqw;height:5.6cqw;font-size:2.9cqw}
+  #stepNow{display:block;margin-top:1.6cqw;font-size:2.9cqw;font-weight:800;color:#f0c74a}
+  .ovlLeg{margin-top:1.4cqw;font-size:2.45cqw;line-height:1.4}
+  #stepDesc{margin-top:1cqw;padding-top:1cqw;font-size:2.75cqw;line-height:1.42;
+            max-height:38cqw;overflow-y:auto}
+
+  #botBar{left:3%;right:3%;bottom:1.2%;flex-wrap:wrap;justify-content:center;gap:1.4cqw}
+  .grp{gap:1.2cqw}
+  #toZones,#toggleStand{display:none}
+
+  #modalBox{width:94vw;max-height:88vh;padding:4cqw 4.4cqw;border-radius:3cqw}
+  #modalBox h2{font-size:5.4cqw}
+  #modalBox .sub{font-size:2.9cqw;margin-bottom:3cqw}
+  #modalBox h3{font-size:3.6cqw;margin:3cqw 0 1.4cqw}
+  #modalBox p,#modalBox li{font-size:3.1cqw;line-height:1.55}
+  #modalBox li{padding-left:4cqw;margin-bottom:1.2cqw}
+  #modalBox li:before{width:1.5cqw;height:1.5cqw;left:.6cqw;top:1.8cqw}
+  .note{font-size:3cqw;padding:2.2cqw 2.8cqw;border-left-width:.9cqw}
+  .mcols{flex-direction:column;gap:3cqw}
+  .mfig{flex:none;width:100%;display:flex;flex-wrap:wrap;gap:2cqw}
+  .mfig{align-items:center}
+  .mfig .msvg{width:58%}
+  .mcap{font-size:2.5cqw;width:36%;margin-top:0;text-align:left;line-height:1.4}
+  #modalClose{right:2.6cqw;top:2.6cqw}
+}
 </style>
 </head>
 <body>
 <div id="stage">
 <div id="field">
 
-  <div id="court">
-    <div class="frame"></div>
-    <div class="zoneBox" style="left:.55%;width:32.2%"></div>
-    <div class="zoneBox" style="left:33.9%;width:15.6%"></div>
-    <div class="zoneBox" style="left:50.5%;width:15.6%"></div>
-    <div class="zoneBox" style="left:67.25%;width:32.2%"></div>
-    <div id="sideTag">НАША СТОРОНА</div>
-    <div id="oppTag">СОПЕРНИК</div>
-    <div id="netline"></div>
-  </div>
+  <svg id="board" preserveAspectRatio="none"></svg>
 
-  <svg id="arrows" viewBox="0 0 720 448" preserveAspectRatio="none"></svg>
   <div id="layer">
     <div id="ball" style="left:50%;top:50%">
       <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="#f7c948" stroke="#2b2b2b" stroke-width="3"/>
@@ -222,6 +255,7 @@ body{
   <div class="ui" id="steps">
     <h4>Ход розыгрыша</h4>
     <div id="stepList"></div>
+    <div id="stepNow"></div>
     <div id="stepDesc"></div>
     <div id="legend">
       <div><i style="background:#d93a3a"></i>С — связующий</div>
@@ -409,17 +443,49 @@ function buildSteps(mode,r){
 }
 
 /* ======================= ОТРИСОВКА ======================= */
-const FX = x => (x+60)/720*100, FY = y => (y+84)/448*100;
+let portrait = false;
+/* Координаты площадки: x — глубина (0 — наша лицевая, 300 — сетка, 600 — лицевая соперника),
+   y — поперёк (0 — левая боковая). T переводит их в систему кадра. */
+const VIEW = {land:{w:720,h:448}, port:{w:344,h:840}};
+function VB(){ return portrait?VIEW.port:VIEW.land; }
+function T(x,y){ return portrait ? [y+22, 662-x] : [x+60, y+84]; }
+function XY(p){ const t=T(p[0],p[1]), v=VB(); return [t[0]/v.w*100, t[1]/v.h*100]; }
+function R(x1,y1,x2,y2){ const a=T(x1,y1), b=T(x2,y2);
+  return {x:Math.min(a[0],b[0]), y:Math.min(a[1],b[1]),
+          w:Math.abs(b[0]-a[0]), h:Math.abs(b[1]-a[1])}; }
+function rect(r,attr){ return '<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" '+attr+'/>'; }
+
+/* сама площадка */
+function courtSVG(){
+  const v=VB(), cl = portrait ? {x:0,y:44,w:v.w,h:672} : {x:0,y:0,w:v.w,h:v.h};
+  let out='<clipPath id="cc">'+rect(cl,'')+'</clipPath><g clip-path="url(#cc)">';
+  out+=rect(R(-6,-6,606,306),'rx="4" fill="#fff" style="filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))"');
+  [[0,200],[200,300],[300,400],[400,600]].forEach(function(z){
+    out+=rect(R(z[0]+2.5,2.5,z[1]-2.5,297.5),'fill="#8f8f8f"');
+  });
+  const st = portrait?9:20, n = portrait?2:3, rr = portrait?2.6:3.6;
+  for(let k=1;k<=n;k++) [-k*st, 300+k*st].forEach(function(y){
+    const t=T(300,y);
+    out+='<circle cx="'+t[0]+'" cy="'+t[1]+'" r="'+rr+'" fill="#fff"/>';
+  });
+  const lab='fill="#fff" opacity=".42" font-weight="700" letter-spacing="2.2"';
+  if(portrait){
+    const a=T(424,150), b=T(24,150);
+    out+='<text x="'+a[0]+'" y="'+a[1]+'" text-anchor="middle" font-size="12" '+lab+'>СОПЕРНИК</text>';
+    out+='<text x="'+b[0]+'" y="'+b[1]+'" text-anchor="middle" font-size="12" '+lab+'>НАША СТОРОНА</text>';
+  } else {
+    const a=T(0,0), b=T(600,0);
+    out+='<text x="'+(a[0]+3)+'" y="'+(a[1]-11)+'" font-size="11" '+lab+'>НАША СТОРОНА</text>';
+    out+='<text x="'+(b[0]-3)+'" y="'+(b[1]-11)+'" text-anchor="end" font-size="11" '+lab+'>СОПЕРНИК</text>';
+  }
+  return out+'</g>';
+}
 const layer=document.getElementById('layer'), ball=document.getElementById('ball'),
-      arrows=document.getElementById('arrows'), stepList=document.getElementById('stepList'),
+      arrows=document.getElementById('board'), stepList=document.getElementById('stepList'),
       stepDesc=document.getElementById('stepDesc');
 
 let state={mode:'serve', rot:0, step:0, steps:[], playing:null, overlap:false};
 const nodes={};
-
-/* сетка из точек */
-(function(){ const n=document.getElementById('netline');
-  for(let i=0;i<16;i++) n.appendChild(document.createElement('i')); })();
 
 IDS.forEach(id=>{
   const el=document.createElement('div');
@@ -452,13 +518,13 @@ function render(){
   IDS.forEach(id=>{
     const p=s.pos[id], el=nodes[id], z=zoneOf(state.rot,id);
     const moved = prev && (Math.abs(prev.pos[id][0]-p[0])>14 || Math.abs(prev.pos[id][1]-p[1])>14);
-    el.style.left=FX(p[0])+'%'; el.style.top=FY(p[1])+'%';
+    const xy=XY(p); el.style.left=xy[0]+'%'; el.style.top=xy[1]+'%';
     el.classList.toggle('moving',!!moved);
     el.classList.toggle('hl', s.hl.indexOf(id)>=0);
     el.classList.toggle('srv', id===server && state.step<=2);
     el.querySelector('.zbadge').textContent=z;
   });
-  ball.style.left=FX(s.ball[0])+'%'; ball.style.top=FY(s.ball[1])+'%';
+  const bxy=XY(s.ball); ball.style.left=bxy[0]+'%'; ball.style.top=bxy[1]+'%';
   const canCheck = state.step<=1;
   const ob=document.getElementById('ovlBtn');
   ob.classList.toggle('on', state.overlap && canCheck);
@@ -468,8 +534,9 @@ function render(){
   [...stepList.children].forEach((r,i)=>{
     r.classList.toggle('on',i===state.step); r.classList.toggle('done',i<state.step);
   });
+  document.getElementById('stepNow').textContent=(state.step+1)+' / '+state.steps.length+' · '+s.t;
   stepDesc.innerHTML = s.d + ((state.overlap && canCheck) ?
-    '<div style="margin-top:.6cqw;font-size:1.06cqw;line-height:1.45;color:rgba(255,255,255,.72)">'+
+    '<div class="ovlLeg">'+
     '<div><span style="color:#5ec8ff">&#9632;</span> по глубине: передний ближе к сетке, чем его задний</div>'+
     '<div><span style="color:#8ce06a">&#9632;</span> поперёк: порядок в линии не нарушен</div>'+
     (state.mode==='serve'?'<div style="opacity:.75">подающий от правила расстановки свободен</div>':'')+
@@ -479,7 +546,7 @@ function render(){
 }
 
 /* ---------- «упор в барьер»: две стрелки навстречу и перегородка ---------- */
-function barrierSVG(ax,ay,bx,by,col,off,ox,oy){
+function barrierSVG(ax,ay,bx,by,col,off){
   const dx=bx-ax, dy=by-ay, D=Math.hypot(dx,dy);
   if(!D) return '';
   const ux=dx/D, uy=dy/D, px=-uy, py=ux;
@@ -489,17 +556,17 @@ function barrierSVG(ax,ay,bx,by,col,off,ox,oy){
   const half=len/2, mx=(x1+x2)/2, my=(y1+y2)/2;
   const head=Math.min(10,half*0.66), hw=head*0.58,
         gap=Math.min(2.5,half*0.14), barH=Math.max(5,Math.min(10,half*0.75));
-  let out='<path d="M'+(mx+px*barH+ox)+' '+(my+py*barH+oy)+'L'+(mx-px*barH+ox)+' '+(my-py*barH+oy)+
+  let out='<path d="M'+(mx+px*barH+0)+' '+(my+py*barH+0)+'L'+(mx-px*barH+0)+' '+(my-py*barH+0)+
           '" stroke="'+col+'" stroke-width="3.6" stroke-linecap="round"/>';
   [[x1,y1],[x2,y2]].forEach(function(e){
     const vx=(mx-e[0]), vy=(my-e[1]), l=Math.hypot(vx,vy);
     if(!l) return;
     const nx=vx/l, ny=vy/l;
     const tx=mx-nx*gap, ty=my-ny*gap, bx0=tx-nx*head, by0=ty-ny*head;
-    out+='<path d="M'+(tx+ox)+' '+(ty+oy)+'L'+(bx0+px*hw+ox)+' '+(by0+py*hw+oy)+
-         'L'+(bx0-px*hw+ox)+' '+(by0-py*hw+oy)+'z" fill="'+col+'"/>';
+    out+='<path d="M'+(tx+0)+' '+(ty+0)+'L'+(bx0+px*hw+0)+' '+(by0+py*hw+0)+
+         'L'+(bx0-px*hw+0)+' '+(by0-py*hw+0)+'z" fill="'+col+'"/>';
     if(l-gap-head>2.5)
-      out+='<path d="M'+(e[0]+ox)+' '+(e[1]+oy)+'L'+(bx0+ox)+' '+(by0+oy)+
+      out+='<path d="M'+(e[0]+0)+' '+(e[1]+0)+'L'+(bx0+0)+' '+(by0+0)+
            '" stroke="'+col+'" stroke-width="2.9" stroke-linecap="round"/>';
   });
   return out;
@@ -511,45 +578,52 @@ function overlapSVG(pos,r,mode){
   let out='';
   [[4,5],[3,6],[2,1]].forEach(function(pr){          /* по глубине: передний — ближе к сетке */
     if(pr[1]===skip) return;
-    const B=pos[rot[pr[1]]], F=pos[rot[pr[0]]];
-    out+=barrierSVG(B[0],B[1],F[0],F[1],'#5ec8ff',OFF,60,84);
+    const B=T(pos[rot[pr[1]]][0],pos[rot[pr[1]]][1]), F=T(pos[rot[pr[0]]][0],pos[rot[pr[0]]][1]);
+    out+=barrierSVG(B[0],B[1],F[0],F[1],'#5ec8ff',OFF);
   });
   [[4,3],[3,2],[5,6],[6,1]].forEach(function(pr){    /* порядок внутри линии */
     if(pr[0]===skip||pr[1]===skip) return;
-    const A=pos[rot[pr[0]]], B=pos[rot[pr[1]]];
-    out+=barrierSVG(A[0],A[1],B[0],B[1],'#8ce06a',OFF,60,84);
+    const A=T(pos[rot[pr[0]]][0],pos[rot[pr[0]]][1]), B=T(pos[rot[pr[1]]][0],pos[rot[pr[1]]][1]);
+    out+=barrierSVG(A[0],A[1],B[0],B[1],'#8ce06a',OFF);
   });
   return out;
 }
 
 /* полосы базы по амплуа — те же, что на схеме в подсказке «Смысл 4-2» */
-const BANDS=[{y0:0,y1:102,c:'#2a7fd4',t:'ДОИГРОВЩИКИ'},
-             {y0:102,y1:198,c:'#2fa14d',t:'ЦЕНТРАЛЬНЫЕ'},
-             {y0:198,y1:300,c:'#d93a3a',t:'СВЯЗУЮЩИЙ / ПРАВЫЙ'}];
+const BANDS=[{y0:0,y1:102,c:'#2a7fd4',t:'ДОИГРОВЩИКИ',s:'ДОИГРОВЩИКИ'},
+             {y0:102,y1:198,c:'#2fa14d',t:'ЦЕНТРАЛЬНЫЕ',s:'ЦЕНТРАЛЬНЫЕ'},
+             {y0:198,y1:300,c:'#d93a3a',t:'СВЯЗУЮЩИЙ / ПРАВЫЙ',s:'СВЯЗУЮЩИЙ'}];
 function bandsSVG(){
   let out='';
   BANDS.forEach(function(b){
-    out+='<rect x="60" y="'+(b.y0+84)+'" width="300" height="'+(b.y1-b.y0)+'" fill="'+b.c+'" opacity=".2"/>';
-    out+='<text x="210" y="'+(b.y0+100)+'" text-anchor="middle" fill="#fff" opacity=".7" '+
-         'font-size="11" font-weight="800" letter-spacing="1.2">'+b.t+'</text>';
+    out+=rect(R(0,b.y0,300,b.y1),'fill="'+b.c+'" opacity=".2"');
+    if(!portrait){                       /* в портрете полос хватает: подписи только мешают */
+      const t=T(150,b.y0+16);
+      out+='<text x="'+t[0]+'" y="'+t[1]+'" text-anchor="middle" fill="#fff" opacity=".72" '+
+           'font-size="11" font-weight="800" letter-spacing="1.2">'+b.t+'</text>';
+    }
   });
   return out;
 }
 function drawArrows(prev,s){
-  const check = state.overlap && state.step<=1;
+  const check = state.overlap && state.step<=1, v=VB();
+  arrows.setAttribute('viewBox','0 0 '+v.w+' '+v.h);
   let out='<defs><marker id="ah" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" '+
     'markerHeight="5.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ffd54a"/></marker></defs>';
+  out+=courtSVG();
   if(s.bands) out+=bandsSVG();
   if(prev && !check){
     IDS.forEach(function(id){
       const a=prev.pos[id], b=s.pos[id];
       const dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
       if(len<16) return;
-      const R=21, ux=dx/len, uy=dy/len;
-      const x1=a[0]+ux*R, y1=a[1]+uy*R, x2=b[0]-ux*R, y2=b[1]-uy*R;
+      const RR=21, ux=dx/len, uy=dy/len;
+      const A=T(a[0]+ux*RR, a[1]+uy*RR), B=T(b[0]-ux*RR, b[1]-uy*RR);
+      const x1=A[0],y1=A[1],x2=B[0],y2=B[1];
       if(Math.hypot(x2-x1,y2-y1)<6) return;
-      const mx=(x1+x2)/2-uy*len*0.13, my=(y1+y2)/2+ux*len*0.13;
-      out+='<path class="mv" d="M'+(x1+60)+' '+(y1+84)+' Q'+(mx+60)+' '+(my+84)+' '+(x2+60)+' '+(y2+84)+
+      const dX=x2-x1, dY=y2-y1;
+      const mx=(x1+x2)/2-dY*0.13, my=(y1+y2)/2+dX*0.13;
+      out+='<path class="mv" d="M'+x1+' '+y1+' Q'+mx+' '+my+' '+x2+' '+y2+
            '" stroke="#ffd54a" stroke-width="3.2" stroke-dasharray="9 7" opacity=".85" marker-end="url(#ah)"/>';
     });
   }
@@ -633,7 +707,7 @@ function svgZones(opts){
   if(o.pairs){
     [[4,5],[3,6],[2,1]].forEach(function(pr){
       const F=Zc[pr[0]],B=Zc[pr[1]];
-      s+=barrierSVG(B[0],B[1],F[0],F[1],'#5ec8ff',27,0,0);
+      s+=barrierSVG(B[0],B[1],F[0],F[1],'#5ec8ff',27);
     });
   }
   if(o.opp){   /* диагонали: кто кому «противоположный» */
@@ -645,7 +719,7 @@ function svgZones(opts){
   }
   if(o.order){
     [[4,3],[3,2],[5,6],[6,1]].forEach(function(pr){
-      s+=barrierSVG(Zc[pr[0]][0],Zc[pr[0]][1],Zc[pr[1]][0],Zc[pr[1]][1],'#8ce06a',27,0,0);
+      s+=barrierSVG(Zc[pr[0]][0],Zc[pr[0]][1],Zc[pr[1]][0],Zc[pr[1]][1],'#8ce06a',27);
     });
   }
   for(let z=1;z<=6;z++){
@@ -708,6 +782,9 @@ svgZones({bands:true,labels:{4:{t:'Д',color:'#16508a'},5:{t:'Д',color:'#2a7fd4
 document.getElementById('hRules').onclick=function(){ openModal(HTML_RULES); };
 document.getElementById('hIdea').onclick=function(){ openModal(HTML_IDEA); };
 
+const mqPort = matchMedia('(max-aspect-ratio: 1/1)');
+portrait = mqPort.matches;
+mqPort.addEventListener('change', function(e){ portrait=e.matches; render(); });
 rebuild();
 </script>
 </body>
